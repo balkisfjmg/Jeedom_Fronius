@@ -235,6 +235,26 @@ class fronius extends eqLogic {
 		$info->setOrder(11);
 		$info->save();
 
+# ==========================================================
+# FJMG 2021-04-23 Info command added
+# ==========================================================
+    $info = $this->getCmd(null, 'consumo');
+    if (!is_object($info)) {
+      $info = new froniusCmd();
+      $info->setName(__('Consumo', __FILE__));
+    }
+    $info->setLogicalId('consumo');
+    $info->setEqLogic_id($this->getId());
+    $info->setType('info');
+    $info->setSubType('numeric');
+    $info->setIsHistorized(1);
+    $info->setUnite('W');
+    $info->setOrder(12);
+    $info->save();
+
+
+# ==========================================================
+
 		$refresh = $this->getCmd(null, 'refresh');
 		if (!is_object($refresh)) {
 			$refresh = new froniusCmd();
