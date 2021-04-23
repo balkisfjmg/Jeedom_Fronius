@@ -478,7 +478,8 @@ switch ($VersionAPI) {
 			$this->checkAndUpdateCmd('consumo', $consumo);
 
 			$this->checkAndUpdateCmd('status', 'OK');
-			log::add('fronius', 'debug','All good: Data='.$data);
+      log::add('fronius', 'debug','All good: Data='.$data);
+      log::add('fronius', 'debug','All good 2: Data2='.$data2);
 			return;
 		}
 
