@@ -303,8 +303,84 @@ class fronius extends eqLogic {
 			$Fronius_Port = 80;
 		}
 
-		$ch = curl_init();
+    $ch = curl_init();
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+    #   =============================================================================
+    #   2021-04-23 FJMG Second call + second DataCollection
+    #   ============================================================================
+
+    switch ($VersionAPI) {
+      case '0':
+        $Url = 'http://'.$Fronius_IP.':'.$Fronius_Port.'/solar_api/GetMeterRealtimeData.cgi?Scope=Device&DeviceId=1&DataCollection=CommonInverterData';
+        break;
+
+      case '1';
+        $Url = 'http://'.$Fronius_IP.':'.$Fronius_Port.'/solar_api/v1/GetMeterRealtimeData.cgi?Scope=Device&DeviceId=1&DataCollection=CommonInverterData';
+        break;
+
+      default:
+        log::add('fronius', 'error','Error getting inverter API Version: '.curl_error($ch));
+        $this->checkAndUpdateCmd('status', 'Version API non supportée');
+        return;
+    }
+
+
+        // COLLECTING VALUES - GetMeterRealtimeData -> $data2 -> $json2
+        curl_setopt($ch, CURLOPT_URL, $Url);
+        $data2 = curl_exec($ch);
+
+        if (curl_errno($ch)) {
+          curl_close ($ch);
+          log::add('fronius', 'error','Error getting meter values: '.curl_error($ch));
+          $this->checkAndUpdateCmd('status', 'Erreur Données');
+          return;
+        }
+
+        $json2 = json_decode($data2, true);
+
+        $consumo = $json2['Body']['Data']['0']['PowerReal_P_Sum']['Value'];
+        log::add('fronius', 'debug','Consumo: Data2='.$data2);
+
+        // $pv_total = $json['Body']['Data']['TOTAL_ENERGY']['Value'];
+
+        // {
+        //    "Body" : {
+        //       "Data" : {
+        //          "0" : {
+        //             "Current_AC_Phase_1" : 1.9550000000000001,
+        //             "Current_AC_Sum" : 1.9550000000000001,
+        //             "Details" : {
+        //                "Manufacturer" : "Fronius",
+        //                "Model" : "Smart Meter TS 100A-1",
+        //                "Serial" : "816710109"
+        //             },
+        //             "Enable" : 1,
+        //             "EnergyReactive_VArAC_Sum_Consumed" : 310012,
+        //             "EnergyReactive_VArAC_Sum_Produced" : 64667,
+        //             "EnergyReal_WAC_Minus_Absolute" : 739014,
+        //             "EnergyReal_WAC_Plus_Absolute" : 1739327,
+        //             "EnergyReal_WAC_Sum_Consumed" : 1739327,
+        //             "EnergyReal_WAC_Sum_Produced" : 739014,
+        //             "Frequency_Phase_Average" : 49.899999999999999,
+        //             "Meter_Location_Current" : 0,
+        //             "PowerApparent_S_Phase_1" : 366.10000000000002,
+        //             "PowerApparent_S_Sum" : 366.10000000000002,
+        //             "PowerFactor_Phase_1" : -0.97999999999999998,
+        //             "PowerFactor
+
+
+
+
+    #   =============================================================================
+
+
+    # =================================================================
+    #  FJMG - 2021-04-23 - id http-get GetInverterRealtimeData
+    #  $Url = 'http://'.$Fronius_IP.':'.$Fronius_Port.'/solar_api/v1/GetInverterRealtimeData.cgi?Scope=Device&DeviceId=1&DataCollection=CommonInverterData';
+    # =================================================================
+    #  Llamada de generación
+    # =================================================================
 
 		// READ STORED API VERSION
 		try {
@@ -330,12 +406,6 @@ class fronius extends eqLogic {
 			$VersionAPI = $json['APIVersion'];
 			$this->checkAndUpdateCmd('VersionAPI', $VersionAPI);
 		}
-
-# =================================================================
-#  FJMG - 2021-04-23 - id http-get GetInverterRealtimeData
-#  $Url = 'http://'.$Fronius_IP.':'.$Fronius_Port.'/solar_api/v1/GetInverterRealtimeData.cgi?Scope=Device&DeviceId=1&DataCollection=CommonInverterData';
-# =================================================================
-
 
 		switch ($VersionAPI) {
 			case '0':
@@ -375,80 +445,6 @@ class fronius extends eqLogic {
 		$pv_day = $json['Body']['Data']['DAY_ENERGY']['Value'];
 		$pv_year = $json['Body']['Data']['YEAR_ENERGY']['Value'];
 
-#   =============================================================================
-#   2021-04-23 FJMG Second call + second DataCollection
-#   ============================================================================
-
-switch ($VersionAPI) {
-  case '0':
-    $Url = 'http://'.$Fronius_IP.':'.$Fronius_Port.'/solar_api/GetMeterRealtimeData.cgi?Scope=Device&DeviceId=1&DataCollection=CommonInverterData';
-    break;
-
-  case '1';
-    $Url = 'http://'.$Fronius_IP.':'.$Fronius_Port.'/solar_api/v1/GetMeterRealtimeData.cgi?Scope=Device&DeviceId=1&DataCollection=CommonInverterData';
-    break;
-
-  default:
-    log::add('fronius', 'error','Error getting inverter API Version: '.curl_error($ch));
-    $this->checkAndUpdateCmd('status', 'Version API non supportée');
-    return;
-}
-
-
-    // COLLECTING VALUES - GetMeterRealtimeData -> $data2 -> $json2
-    curl_setopt($ch, CURLOPT_URL, $Url);
-    $data2 = curl_exec($ch);
-
-    if (curl_errno($ch)) {
-      curl_close ($ch);
-      log::add('fronius', 'error','Error getting meter values: '.curl_error($ch));
-      $this->checkAndUpdateCmd('status', 'Erreur Données');
-      return;
-    }
-
-    $json2 = json_decode($data2, true);
-
-    $consumo = $json2['Body']['Data']['0']['PowerReal_P_Sum']['Value'];
-    // $pv_total = $json['Body']['Data']['TOTAL_ENERGY']['Value'];
-    // $frequency = $json['Body']['Data']['FAC']['Value'];
-    // $voltage_AC = $json['Body']['Data']['UAC']['Value'];
-    // $voltage_DC = $json['Body']['Data']['UDC']['Value'];
-    // $current_AC = $json['Body']['Data']['IAC']['Value'];
-    // $current_DC = $json['Body']['Data']['IDC']['Value'];
-    // $pv_day = $json['Body']['Data']['DAY_ENERGY']['Value'];
-    // $pv_year = $json['Body']['Data']['YEAR_ENERGY']['Value'];
-
-
-    // {
-    //    "Body" : {
-    //       "Data" : {
-    //          "0" : {
-    //             "Current_AC_Phase_1" : 1.9550000000000001,
-    //             "Current_AC_Sum" : 1.9550000000000001,
-    //             "Details" : {
-    //                "Manufacturer" : "Fronius",
-    //                "Model" : "Smart Meter TS 100A-1",
-    //                "Serial" : "816710109"
-    //             },
-    //             "Enable" : 1,
-    //             "EnergyReactive_VArAC_Sum_Consumed" : 310012,
-    //             "EnergyReactive_VArAC_Sum_Produced" : 64667,
-    //             "EnergyReal_WAC_Minus_Absolute" : 739014,
-    //             "EnergyReal_WAC_Plus_Absolute" : 1739327,
-    //             "EnergyReal_WAC_Sum_Consumed" : 1739327,
-    //             "EnergyReal_WAC_Sum_Produced" : 739014,
-    //             "Frequency_Phase_Average" : 49.899999999999999,
-    //             "Meter_Location_Current" : 0,
-    //             "PowerApparent_S_Phase_1" : 366.10000000000002,
-    //             "PowerApparent_S_Sum" : 366.10000000000002,
-    //             "PowerFactor_Phase_1" : -0.97999999999999998,
-    //             "PowerFactor
-
-
-
-
-#   =============================================================================
-
 		if ($pv_power == '') {
 			$this->checkAndUpdateCmd('pv_power', 0);
 			$this->checkAndUpdateCmd('pv_total', 0);
@@ -479,7 +475,6 @@ switch ($VersionAPI) {
 
 			$this->checkAndUpdateCmd('status', 'OK');
       log::add('fronius', 'debug','All very good: Data='.$data);
-      log::add('fronius', 'debug','All good 2: Data2='.$data2);
 			return;
 		}
 
