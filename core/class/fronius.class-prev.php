@@ -388,7 +388,7 @@ switch ($VersionAPI) {
 
     $json2 = json_decode($data2, true);
 
-    $consumo = $json2['Body']['Data']['0']['PowerReal_P_Sum']['Value'];
+    // $pv_power = $json['Body']['Data']['PAC']['Value'];
     // $pv_total = $json['Body']['Data']['TOTAL_ENERGY']['Value'];
     // $frequency = $json['Body']['Data']['FAC']['Value'];
     // $voltage_AC = $json['Body']['Data']['UAC']['Value'];
@@ -439,7 +439,6 @@ switch ($VersionAPI) {
 			$this->checkAndUpdateCmd('current_DC', 0);
 			$this->checkAndUpdateCmd('pv_day', 0);
 			$this->checkAndUpdateCmd('pv_year', 0);
-			$this->checkAndUpdateCmd('consumo', 0);
 
 			$this->checkAndUpdateCmd('status', 'Hors Ligne ...');
 			log::add('fronius', 'debug','Inverter is off-line ...');
@@ -455,7 +454,6 @@ switch ($VersionAPI) {
 			$this->checkAndUpdateCmd('current_DC', $current_DC);
 			$this->checkAndUpdateCmd('pv_day', $pv_day);
 			$this->checkAndUpdateCmd('pv_year', $pv_year);
-			$this->checkAndUpdateCmd('consumo', $consumo);
 
 			$this->checkAndUpdateCmd('status', 'OK');
 			log::add('fronius', 'debug','All good: Data='.$data);
