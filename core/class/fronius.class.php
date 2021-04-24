@@ -308,6 +308,7 @@ class fronius extends eqLogic {
 
     #   =============================================================================
     #   2021-04-23 FJMG Second call + second DataCollection
+    #   2021-04-24 FJMG Shifted to first call
     #   ============================================================================
 
     switch ($VersionAPI) {
@@ -329,6 +330,8 @@ class fronius extends eqLogic {
         // COLLECTING VALUES - GetMeterRealtimeData -> $data2 -> $json2
         curl_setopt($ch, CURLOPT_URL, $Url);
         $data2 = curl_exec($ch);
+        log::add('fronius', 'debug','Llamada Consumo:='.$ch);
+        log::add('fronius', 'debug','Consumo: Data2='.$data2);
 
         if (curl_errno($ch)) {
           curl_close ($ch);
